@@ -1,20 +1,7 @@
+use crate::qmk_keycodes::QmkKeyCode;
 use serde::Deserialize;
 use serde_json;
 use serde_json::Error as JsonError;
-
-#[derive(Deserialize, Debug)]
-pub enum QmkKeyCode {
-    #[serde(rename = "KC_CAPS")]
-    KcCaps,
-    #[serde(rename = "KC_PGUP")]
-    KcPgUp,
-    #[serde(rename = "KC_DEL")]
-    KcDel,
-    #[serde(rename = "KC_END")]
-    KcEnd,
-    #[serde(rename = "KC_PGDN")]
-    KcPgDn,
-}
 
 #[derive(Deserialize, Debug)]
 pub struct QmkKeymap {
