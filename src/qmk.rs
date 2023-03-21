@@ -64,6 +64,7 @@ fn lex<'a>(input: &'a str) -> Result<Vec<LexItem<'a>>, String> {
             }
             '(' | ')' => {
                 result.push(LexItem::Parenthesis(c));
+                pos = it.next();
             }
             ' ' | ',' => {}
             _ => {
