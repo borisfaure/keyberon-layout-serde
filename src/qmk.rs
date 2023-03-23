@@ -73,29 +73,20 @@ fn lex<'a>(input: &'a str) -> Result<Vec<LexItem<'a>>, String> {
     Ok(result)
 }
 
-/// Parse a MomentaryTurnLayerOn
-fn parse_mo(tokens: &[LexItem]) -> Result<QmkAction, String> {
+/// Parse a function that only accepts a u8 (usually a layer)
+fn parse_func_u8(func: &str, tokens: &[LexItem]) -> Result<u8, String> {
     if tokens.len() != 3 {
-        return Err(format!("MO: must have 3 tokens, got {}", tokens.len()));
+        return Err(format!(
+            "{}: must have 3 tokens, got {}",
+            func,
+            tokens.len()
+        ));
     }
     match (&tokens[0], &tokens[1], &tokens[2]) {
         (LexItem::Parenthesis('('), LexItem::Number(num), LexItem::Parenthesis(')')) => {
-            Ok(QmkAction::MomentaryTurnLayerOn(*num as u8))
+            Ok(*num as u8)
         }
-        _ => Err(String::from("MO: invalid tokens")),
-    }
-}
-
-/// Parse ToggleLayer
-fn parse_tg(tokens: &[LexItem]) -> Result<QmkAction, String> {
-    if tokens.len() != 3 {
-        return Err(format!("TG: must have 3 tokens, got {}", tokens.len()));
-    }
-    match (&tokens[0], &tokens[1], &tokens[2]) {
-        (LexItem::Parenthesis('('), LexItem::Number(num), LexItem::Parenthesis(')')) => {
-            Ok(QmkAction::ToggleLayer(*num as u8))
-        }
-        _ => Err(String::from("TG: invalid tokens")),
+        _ => Err(String::from("func: invalid tokens")),
     }
 }
 
@@ -118,8 +109,11 @@ fn parse(tokens: &[LexItem]) -> Result<QmkAction, String> {
     }
     if let LexItem::Token(tok) = tokens[0] {
         match tok {
-            "MO" => parse_mo(&tokens[1..]),
-            "TG" => parse_tg(&tokens[1..]),
+            "MO" => Ok(QmkAction::MomentaryTurnLayerOn(parse_func_u8(
+                tok,
+                &tokens[1..],
+            )?)),
+            "TG" => Ok(QmkAction::ToggleLayer(parse_func_u8(tok, &tokens[1..])?)),
             _ => return Err(format!("unsupported command {}", tok)),
         }
     } else {
