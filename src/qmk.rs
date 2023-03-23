@@ -1,8 +1,6 @@
 use crate::qmk_keycodes::QmkKeyCode;
 use serde::de::{self, Deserializer, IntoDeserializer};
 use serde::Deserialize;
-use serde_json;
-use serde_json::Error as JsonError;
 
 #[derive(Debug)]
 pub enum QmkAction {
@@ -36,7 +34,7 @@ fn lex<'a>(input: &'a str) -> Result<Vec<LexItem<'a>>, String> {
         match c {
             '0'..='9' => {
                 let mut num: usize = 0;
-                while let Some((i, c)) = pos {
+                while let Some((_i, c)) = pos {
                     match c {
                         '0'..='9' => {
                             num = (c as usize - '0' as usize) + num * 10;
@@ -75,6 +73,32 @@ fn lex<'a>(input: &'a str) -> Result<Vec<LexItem<'a>>, String> {
     Ok(result)
 }
 
+/// Parse a MomentaryTurnLayerOn
+fn parse_mo(tokens: &[LexItem]) -> Result<QmkAction, String> {
+    if tokens.len() != 3 {
+        return Err(format!("MO: must have 3 tokens, got {}", tokens.len()));
+    }
+    match (&tokens[0], &tokens[1], &tokens[2]) {
+        (LexItem::Parenthesis('('), LexItem::Number(num), LexItem::Parenthesis(')')) => {
+            Ok(QmkAction::MomentaryTurnLayerOn(*num as u8))
+        }
+        _ => Err(String::from("MO: invalid tokens")),
+    }
+}
+
+/// Parse ToggleLayer
+fn parse_tg(tokens: &[LexItem]) -> Result<QmkAction, String> {
+    if tokens.len() != 3 {
+        return Err(format!("TG: must have 3 tokens, got {}", tokens.len()));
+    }
+    match (&tokens[0], &tokens[1], &tokens[2]) {
+        (LexItem::Parenthesis('('), LexItem::Number(num), LexItem::Parenthesis(')')) => {
+            Ok(QmkAction::ToggleLayer(*num as u8))
+        }
+        _ => Err(String::from("TG: invalid tokens")),
+    }
+}
+
 /// Parse a vector of tokens
 fn parse(tokens: &[LexItem]) -> Result<QmkAction, String> {
     if tokens.is_empty() {
@@ -94,7 +118,8 @@ fn parse(tokens: &[LexItem]) -> Result<QmkAction, String> {
     }
     if let LexItem::Token(tok) = tokens[0] {
         match tok {
-            "MO" => return Err(format!(" got {}", tok)),
+            "MO" => parse_mo(&tokens[1..]),
+            "TG" => parse_tg(&tokens[1..]),
             _ => return Err(format!("unsupported command {}", tok)),
         }
     } else {
@@ -136,8 +161,8 @@ pub struct QmkKeymap {
 
 #[cfg(test)]
 mod qmk_tests {
-    use crate::qmk::JsonError;
     use crate::qmk::QmkKeymap;
+    use serde_json::Error as JsonError;
     #[test]
     fn test_basic_one_layer_only_keycodes() {
         let json = r#"
