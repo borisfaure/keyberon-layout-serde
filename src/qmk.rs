@@ -10,6 +10,14 @@ pub enum QmkAction {
     MomentaryTurnLayerOn(u8),
     /// TG()
     ToggleLayer(u8),
+    /// TO()
+    TurnOnLayerWhenPressed(u8),
+    /// TT()
+    TapToggleLayer(u8),
+    /// DF()
+    DefaultLayer(u8),
+    /// OSL()
+    OneShotLayer(u8),
 }
 
 /// Lexer item
@@ -114,6 +122,13 @@ fn parse(tokens: &[LexItem]) -> Result<QmkAction, String> {
                 &tokens[1..],
             )?)),
             "TG" => Ok(QmkAction::ToggleLayer(parse_func_u8(tok, &tokens[1..])?)),
+            "TO" => Ok(QmkAction::TurnOnLayerWhenPressed(parse_func_u8(
+                tok,
+                &tokens[1..],
+            )?)),
+            "TT" => Ok(QmkAction::TapToggleLayer(parse_func_u8(tok, &tokens[1..])?)),
+            "DF" => Ok(QmkAction::DefaultLayer(parse_func_u8(tok, &tokens[1..])?)),
+            "OSL" => Ok(QmkAction::OneShotLayer(parse_func_u8(tok, &tokens[1..])?)),
             _ => return Err(format!("unsupported command {}", tok)),
         }
     } else {
