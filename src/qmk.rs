@@ -33,7 +33,7 @@ enum LexItem<'a> {
 }
 
 /// Transform @input into a vector of tokens
-fn lex<'a>(input: &'a str) -> Result<Vec<LexItem<'a>>, String> {
+fn lex(input: &'_ str) -> Result<Vec<LexItem<'_>>, String> {
     let mut result = Vec::new();
 
     let chars = input.chars();
