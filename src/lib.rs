@@ -1,2 +1,2 @@
-mod qmk;
-mod qmk_keycodes;
+pub mod qmk;
+pub mod qmk_keycodes;

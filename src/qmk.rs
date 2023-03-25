@@ -1,6 +1,7 @@
 use crate::qmk_keycodes::QmkKeyCode;
 use serde::de::{self, Deserializer, IntoDeserializer};
 use serde::Deserialize;
+use serde_json::Error as JsonError;
 
 #[derive(Debug)]
 pub enum QmkAction {
@@ -168,10 +169,16 @@ pub struct QmkKeymap {
     pub author: String,
 }
 
+impl QmkKeymap {
+    /// Deserialize a JSON string @json into a QmkKeymap
+    pub fn from_str(json: &str) -> Result<Self, JsonError> {
+        serde_json::from_str(json)
+    }
+}
+
 #[cfg(test)]
 mod qmk_tests {
     use crate::qmk::QmkKeymap;
-    use serde_json::Error as JsonError;
     #[test]
     fn test_basic_one_layer_only_keycodes() {
         let json = r#"
@@ -193,7 +200,7 @@ mod qmk_tests {
   ],
   "author": ""
 }"#;
-        let qmk_res: Result<QmkKeymap, JsonError> = serde_json::from_str(&json);
+        let qmk_res = QmkKeymap::from_str(&json);
         assert!(qmk_res.is_ok());
     }
 
@@ -221,7 +228,7 @@ mod qmk_tests {
   ],
   "author": ""
 }"#;
-        let qmk_res: Result<QmkKeymap, JsonError> = serde_json::from_str(&json);
+        let qmk_res = QmkKeymap::from_str(&json);
         println!("{:?}", qmk_res);
         assert!(qmk_res.is_ok());
     }
