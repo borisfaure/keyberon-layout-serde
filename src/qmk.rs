@@ -131,10 +131,10 @@ fn parse(tokens: &[LexItem]) -> Result<QmkAction, String> {
             "TT" => Ok(QmkAction::TapToggleLayer(parse_func_u8(tok, &tokens[1..])?)),
             "DF" => Ok(QmkAction::DefaultLayer(parse_func_u8(tok, &tokens[1..])?)),
             "OSL" => Ok(QmkAction::OneShotLayer(parse_func_u8(tok, &tokens[1..])?)),
-            _ => return Err(format!("unsupported command {}", tok)),
+            _ => Err(format!("unsupported command {}", tok)),
         }
     } else {
-        return Err(String::from("Expecting token"));
+        Err(String::from("Expecting token"))
     }
 }
 
