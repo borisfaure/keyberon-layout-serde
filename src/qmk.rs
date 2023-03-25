@@ -2,6 +2,7 @@ use crate::qmk_keycodes::QmkKeyCode;
 use serde::de::{self, Deserializer, IntoDeserializer};
 use serde::Deserialize;
 use serde_json::Error as JsonError;
+use std::str::FromStr;
 
 #[derive(Debug)]
 pub enum QmkAction {
@@ -169,9 +170,10 @@ pub struct QmkKeymap {
     pub author: String,
 }
 
-impl QmkKeymap {
+impl FromStr for QmkKeymap {
+    type Err = JsonError;
     /// Deserialize a JSON string @json into a QmkKeymap
-    pub fn from_str(json: &str) -> Result<Self, JsonError> {
+    fn from_str(json: &str) -> Result<Self, JsonError> {
         serde_json::from_str(json)
     }
 }
