@@ -112,7 +112,7 @@ pub enum QmkKeyCode {
     KcBackSlash,
     #[serde(rename = "KC_NONUS_HASH")]
     #[serde(alias = "KC_NUHS")]
-    KcNonusHash,
+    KcNonUsHash,
     #[serde(rename = "KC_SEMICOLON")]
     #[serde(alias = "KC_SCLN")]
     KcSemiColon,
@@ -237,7 +237,7 @@ pub enum QmkKeyCode {
     KcKpDot,
     #[serde(rename = "KC_NONUS_BACKSLASH")]
     #[serde(alias = "KC_NUBS")]
-    KcNonusBackslash,
+    KcNonUsBackslash,
     #[serde(rename = "KC_APPLICATION")]
     #[serde(alias = "KC_APP")]
     KcApplication,
