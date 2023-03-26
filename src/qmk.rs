@@ -204,24 +204,93 @@ fn parse_lt(tokens: &[LexItem]) -> Result<QmkAction, String> {
     }
 }
 
+/// Parse extra keycodes like KC_AT
+/// XXX: this function could be behind a feature flag
+fn parse_extra_keycodes(tok: &str) -> Result<QmkAction, String> {
+    match tok {
+        "KC_TILD" | "KC_TILDE" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::KcGrave,
+        )))),
+        "KC_EXLM" | "KC_EXCLAIM" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::Kc1,
+        )))),
+        "KC_AT" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::Kc2,
+        )))),
+        "KC_HASH" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::Kc3,
+        )))),
+        "KC_DLR" | "KC_DOLLAR" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::Kc4,
+        )))),
+        "KC_PERC" | "KC_PERCENT" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::Kc5,
+        )))),
+        "KC_CIRC" | "KC_CIRCUMFLEX" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::Kc6,
+        )))),
+        "KC_AMPR" | "KC_AMPERSAND" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::Kc7,
+        )))),
+        "KC_ASTR" | "KC_ASTERISK" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::Kc8,
+        )))),
+        "KC_LPRN" | "KC_LEFT_PAREN" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::Kc9,
+        )))),
+        "KC_RPRN" | "KC_RIGHT_PAREN" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::Kc0,
+        )))),
+        "KC_UNDS" | "KC_UNDERSCORE" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::KcMinus,
+        )))),
+        "KC_PLUS" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::KcEqual,
+        )))),
+        "KC_LCBR" | "KC_LEFT_CURLY_BRACE" => Ok(QmkAction::LeftShift(Box::new(
+            QmkAction::KeyCode(QmkKeyCode::KcLeftBracket),
+        ))),
+        "KC_RCBR" | "KC_RIGHT_CURLY_BRACE" => Ok(QmkAction::LeftShift(Box::new(
+            QmkAction::KeyCode(QmkKeyCode::KcRightBracket),
+        ))),
+        "KC_PIPE" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::KcBackSlash,
+        )))),
+        "KC_COLN" | "KC_COLON" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::KcSemiColon,
+        )))),
+        "KC_DQUO" | "KC_DOUBLE_QUOTE" | "KC_DQT" => Ok(QmkAction::LeftShift(Box::new(
+            QmkAction::KeyCode(QmkKeyCode::KcQuote),
+        ))),
+        "KC_LABK" | "KC_LEFT_ANGLE_BRACKET" | "KC_LT" => Ok(QmkAction::LeftShift(Box::new(
+            QmkAction::KeyCode(QmkKeyCode::KcComma),
+        ))),
+        "KC_RABK" | "KC_RIGHT_ANGLE_BRACKET" | "KC_GT" => Ok(QmkAction::LeftShift(Box::new(
+            QmkAction::KeyCode(QmkKeyCode::KcDot),
+        ))),
+        "KC_QUES" | "KC_QUESTION" => Ok(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(
+            QmkKeyCode::KcSlash,
+        )))),
+        _ => Err(format!("invalid keycode '{}'", tok)),
+    }
+}
+
 /// Parse a vector of tokens
 fn parse(tokens: &[LexItem]) -> Result<QmkAction, String> {
     if tokens.is_empty() {
-        return Err(String::from("no tokens"));
-    }
-    if tokens.len() == 1 {
+        Err(String::from("no tokens"))
+    } else if tokens.len() == 1 {
         if let LexItem::Token(tok) = tokens[0] {
             let d: de::value::StrDeserializer<de::value::Error> = tok.into_deserializer();
             if let Ok(kc) = QmkKeyCode::deserialize(d) {
-                return Ok(QmkAction::KeyCode(kc));
+                Ok(QmkAction::KeyCode(kc))
             } else {
-                return Err(format!("invalid keycode '{}'", tok));
+                parse_extra_keycodes(tok)
             }
         } else {
             return Err(String::from("Expecting token"));
         }
-    }
-    if let LexItem::Token(tok) = tokens[0] {
+    } else if let LexItem::Token(tok) = tokens[0] {
         match tok {
             "MO" => Ok(QmkAction::MomentaryTurnLayerOn(parse_func_u8(
                 tok,
@@ -452,6 +521,23 @@ mod qmk_tests {
   "layers": [ [
       "LT(0,KC_A)",
       "LT(1,LSFT(KC_B))"
+  ]]}"#;
+        let qmk_res = QmkKeymap::from_json_str(&json);
+        println!("{:?}", qmk_res);
+        assert!(qmk_res.is_ok());
+    }
+
+    #[test]
+    fn test_keymap_us() {
+        let json = r#"{
+  "version": 1, "notes": "", "documentation": "", "keyboard": "", "keymap": "",
+  "layout": "", "author": "",
+  "layers": [ [
+      "KC_TILDE",
+      "LT(0,KC_TILD)",
+      "KC_AT",
+      "KC_COLON",
+      "KC_PLUS"
   ]]}"#;
         let qmk_res = QmkKeymap::from_json_str(&json);
         println!("{:?}", qmk_res);
