@@ -143,7 +143,9 @@ fn lex(input: &'_ str) -> Result<Vec<LexItem<'_>>, String> {
                 result.push(LexItem::Parenthesis(c));
                 pos = it.next();
             }
-            ' ' | ',' => {}
+            ' ' | ',' => {
+                pos = it.next();
+            }
             _ => {
                 return Err(format!("caracter '{}'@{} while parsing {}", c, i, input));
             }
