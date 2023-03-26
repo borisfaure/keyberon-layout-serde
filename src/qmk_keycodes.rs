@@ -1189,6 +1189,26 @@ pub enum QmkKeyCode {
     #[serde(rename = "QK_SEQUENCER_STEPS_CLEAR")]
     #[serde(alias = "SQ_SCLR")]
     QkSequencerStepsClear,
+    #[serde(rename = "KC_P0")]
+    KcP0,
+    #[serde(rename = "KC_P1")]
+    KcP1,
+    #[serde(rename = "KC_P2")]
+    KcP2,
+    #[serde(rename = "KC_P3")]
+    KcP3,
+    #[serde(rename = "KC_P4")]
+    KcP4,
+    #[serde(rename = "KC_P5")]
+    KcP5,
+    #[serde(rename = "KC_P6")]
+    KcP6,
+    #[serde(rename = "KC_P7")]
+    KcP7,
+    #[serde(rename = "KC_P8")]
+    KcP8,
+    #[serde(rename = "KC_P9")]
+    KcP9,
     #[serde(rename = "QK_JOYSTICK_BUTTON_0")]
     #[serde(alias = "JS_0")]
     QkJoystickButton0,
