@@ -132,7 +132,7 @@ fn lex(input: &'_ str) -> Result<Vec<LexItem<'_>>, String> {
                 pos = it.next();
                 while let Some((i, c)) = pos {
                     match c {
-                        'A'..='Z' | '_' => {
+                        'A'..='Z' | '0'..='9' | '_' => {
                             end = i;
                             pos = it.next();
                         }
