@@ -293,7 +293,7 @@ pub enum QmkKeyCode {
     KcCopy,
     #[serde(rename = "KC_PASTE")]
     #[serde(alias = "KC_PSTE")]
-    KcPaster,
+    KcPaste,
     #[serde(rename = "KC_FIND")]
     KcFind,
     #[serde(rename = "KC_KB_MUTE")]
@@ -318,31 +318,31 @@ pub enum QmkKeyCode {
     KcKpEqualAs400,
     #[serde(rename = "KC_INTERNATIONAL_1")]
     #[serde(alias = "KC_INT1")]
-    KcIinternational1,
+    KcInternational1,
     #[serde(rename = "KC_INTERNATIONAL_2")]
     #[serde(alias = "KC_INT2")]
-    KcIinternational2,
+    KcInternational2,
     #[serde(rename = "KC_INTERNATIONAL_3")]
     #[serde(alias = "KC_INT3")]
-    KcIinternational3,
+    KcInternational3,
     #[serde(rename = "KC_INTERNATIONAL_4")]
     #[serde(alias = "KC_INT4")]
-    KcIinternational4,
+    KcInternational4,
     #[serde(rename = "KC_INTERNATIONAL_5")]
     #[serde(alias = "KC_INT5")]
-    KcIinternational5,
+    KcInternational5,
     #[serde(rename = "KC_INTERNATIONAL_6")]
     #[serde(alias = "KC_INT6")]
-    KcIinternational6,
+    KcInternational6,
     #[serde(rename = "KC_INTERNATIONAL_7")]
     #[serde(alias = "KC_INT7")]
-    KcIinternational7,
+    KcInternational7,
     #[serde(rename = "KC_INTERNATIONAL_8")]
     #[serde(alias = "KC_INT8")]
-    KcIinternational8,
+    KcInternational8,
     #[serde(rename = "KC_INTERNATIONAL_9")]
     #[serde(alias = "KC_INT9")]
-    KcIinternational9,
+    KcInternational9,
     #[serde(rename = "KC_LANGUAGE_1")]
     #[serde(alias = "KC_LNG1")]
     KcLanguage1,
@@ -400,10 +400,10 @@ pub enum QmkKeyCode {
     KcClearAgain,
     #[serde(rename = "KC_CRSEL")]
     #[serde(alias = "KC_CRSL")]
-    KcCrsel,
+    KcCrSel,
     #[serde(rename = "KC_EXSEL")]
     #[serde(alias = "KC_EXSL")]
-    KcExsel,
+    KcExSel,
     #[serde(rename = "KC_SYSTEM_POWER")]
     #[serde(alias = "KC_PWR")]
     KcSystemPower,
