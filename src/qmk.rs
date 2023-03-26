@@ -19,6 +19,8 @@ pub enum QmkAction {
     DefaultLayer(u8),
     /// OSL()
     OneShotLayer(u8),
+    /// LT()
+    LayerWhenHeldOr(u8, Box<QmkAction>),
     /// ANY()
     Any(Box<QmkAction>),
     /// LSFT()
@@ -188,6 +190,20 @@ fn parse_func_kc(func: &str, tokens: &[LexItem]) -> Result<Box<QmkAction>, Strin
     }
 }
 
+/// Parse LT(u8, Action)
+fn parse_lt(tokens: &[LexItem]) -> Result<QmkAction, String> {
+    let len = tokens.len();
+    if len < 4 {
+        return Err(format!("LT: must have at least 4 tokens, got {}", len));
+    }
+    match (&tokens[0], &tokens[1], &tokens[len - 1]) {
+        (LexItem::Parenthesis('('), LexItem::Number(num), LexItem::Parenthesis(')')) => Ok(
+            QmkAction::LayerWhenHeldOr(*num as u8, Box::new(parse(&tokens[2..len - 1])?)),
+        ),
+        _ => Err(String::from("LT: invalid tokens")),
+    }
+}
+
 /// Parse a vector of tokens
 fn parse(tokens: &[LexItem]) -> Result<QmkAction, String> {
     if tokens.is_empty() {
@@ -219,6 +235,7 @@ fn parse(tokens: &[LexItem]) -> Result<QmkAction, String> {
             "TT" => Ok(QmkAction::TapToggleLayer(parse_func_u8(tok, &tokens[1..])?)),
             "DF" => Ok(QmkAction::DefaultLayer(parse_func_u8(tok, &tokens[1..])?)),
             "OSL" => Ok(QmkAction::OneShotLayer(parse_func_u8(tok, &tokens[1..])?)),
+            "LT" => parse_lt(&tokens[1..]),
             "ANY" => Ok(QmkAction::Any(parse_func_kc(tok, &tokens[1..])?)),
             "LSFT" => Ok(QmkAction::LeftShift(parse_func_kc(tok, &tokens[1..])?)),
             "LCTL" => Ok(QmkAction::LeftControl(parse_func_kc(tok, &tokens[1..])?)),
@@ -421,6 +438,20 @@ mod qmk_tests {
       "ANY(LCTL(LALT(KC_DEL)))",
       "RCTL(KC_LALT)",
       "ANY(KC_ENTER)"
+  ]]}"#;
+        let qmk_res = QmkKeymap::from_json_str(&json);
+        println!("{:?}", qmk_res);
+        assert!(qmk_res.is_ok());
+    }
+
+    #[test]
+    fn test_kc_lt() {
+        let json = r#"{
+  "version": 1, "notes": "", "documentation": "", "keyboard": "", "keymap": "",
+  "layout": "", "author": "",
+  "layers": [ [
+      "LT(0,KC_A)",
+      "LT(1,LSFT(KC_B))"
   ]]}"#;
         let qmk_res = QmkKeymap::from_json_str(&json);
         println!("{:?}", qmk_res);
