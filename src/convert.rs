@@ -1,6 +1,6 @@
-use crate::keyberon::KeyberonLayers;
-use crate::qmk::QmkKeymap;
+use crate::qmk::QmkAction;
 use crate::qmk_keycodes::QmkKeyCode;
+use keyberon::action::Action;
 use keyberon::key_code::KeyCode;
 use std::convert::TryFrom;
 
@@ -200,27 +200,54 @@ impl TryFrom<QmkKeyCode> for KeyCode {
     }
 }
 
-impl TryFrom<QmkKeymap> for KeyberonLayers {
+impl TryFrom<QmkAction> for Action {
     type Error = String;
 
-    fn try_from(_: QmkKeymap) -> Result<Self, Self::Error> {
-        Err(String::from("failure"))
+    fn try_from(qmk: QmkAction) -> Result<Self, Self::Error> {
+        match qmk {
+            QmkAction::KeyCode(QmkKeyCode::KcNo) => Ok(Action::NoOp),
+            QmkAction::KeyCode(QmkKeyCode::KcTransparent) => Ok(Action::Trans),
+            QmkAction::KeyCode(kc) => Ok(Action::KeyCode(KeyCode::try_from(kc)?)),
+            _ => Err(format!("can not convert {:?} to keyberon action", qmk)),
+        }
     }
 }
 
 #[cfg(test)]
 mod convert_tests {
-    use crate::qmk_keycodes::QmkKeyCode;
-    use keyberon::key_code::KeyCode;
+    use crate::qmk::QmkAction;
+    use crate::qmk_keycodes::QmkKeyCode::*;
+    use keyberon::action::Action;
+    use keyberon::key_code::KeyCode::{self, *};
+
     #[test]
     fn test_convert_keycodes() {
         // A
-        let kc_res = KeyCode::try_from(QmkKeyCode::KcA);
+        let kc_res = KeyCode::try_from(KcA);
         assert!(kc_res.is_ok());
-        assert_eq!(kc_res.unwrap(), KeyCode::A);
+        assert_eq!(kc_res.unwrap(), A);
         // Calculator
-        let kc_res = KeyCode::try_from(QmkKeyCode::KcCalculator);
+        let kc_res = KeyCode::try_from(KcCalculator);
         assert!(kc_res.is_ok());
-        assert_eq!(kc_res.unwrap(), KeyCode::MediaCalc);
+        assert_eq!(kc_res.unwrap(), MediaCalc);
+    }
+
+    #[test]
+    fn test_convert_action_keycodes() {
+        let res = Action::try_from(QmkAction::KeyCode(KcA));
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), Action::KeyCode(A));
+        // Calculator
+        let res = Action::try_from(QmkAction::KeyCode(KcCalculator));
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), Action::KeyCode(MediaCalc));
+        // No
+        let res = Action::try_from(QmkAction::KeyCode(KcNo));
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), Action::NoOp);
+        // Trans
+        let res = Action::try_from(QmkAction::KeyCode(KcTransparent));
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), Action::Trans);
     }
 }
