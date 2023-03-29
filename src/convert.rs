@@ -31,6 +31,7 @@ impl TryFrom<QmkKeyCode> for KeyCode {
             QmkKeyCode::KcT => Ok(KeyCode::T),
             QmkKeyCode::KcU => Ok(KeyCode::U),
             QmkKeyCode::KcV => Ok(KeyCode::V),
+            QmkKeyCode::KcW => Ok(KeyCode::W),
             QmkKeyCode::KcX => Ok(KeyCode::X),
             QmkKeyCode::KcY => Ok(KeyCode::Y),
             QmkKeyCode::KcZ => Ok(KeyCode::Z),
