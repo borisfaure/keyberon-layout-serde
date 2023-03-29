@@ -4,10 +4,10 @@ use crate::qmk_keycodes::QmkKeyCode;
 use keyberon::key_code::KeyCode;
 use std::convert::TryFrom;
 
-impl TryFrom<QmkKeyCode> for KeyCode {
+impl TryFrom<&QmkKeyCode> for KeyCode {
     type Error = String;
 
-    fn try_from(qmk: QmkKeyCode) -> Result<Self, Self::Error> {
+    fn try_from(qmk: &QmkKeyCode) -> Result<Self, Self::Error> {
         match qmk {
             QmkKeyCode::KcA => Ok(KeyCode::A),
             QmkKeyCode::KcB => Ok(KeyCode::B),
@@ -202,7 +202,7 @@ impl TryFrom<QmkKeyCode> for KeyCode {
 }
 
 /// Try to convert into Keyberon::MultipleKeyCodes
-fn try_multiple_keycodes(action: QmkAction, mut v: Vec<KeyCode>) -> Result<Action, String> {
+fn try_multiple_keycodes(action: &QmkAction, mut v: Vec<KeyCode>) -> Result<Action, String> {
     match action {
         QmkAction::KeyCode(QmkKeyCode::KcNo) | QmkAction::KeyCode(QmkKeyCode::KcTransparent) => {
             Err(format!(
@@ -214,105 +214,105 @@ fn try_multiple_keycodes(action: QmkAction, mut v: Vec<KeyCode>) -> Result<Actio
             v.push(KeyCode::try_from(kc)?);
             Ok(Action::MultipleKeyCodes(v))
         }
-        QmkAction::Any(a) => try_multiple_keycodes(*a, v),
+        QmkAction::Any(a) => try_multiple_keycodes(a, v),
         QmkAction::LeftShift(a) => {
             v.push(KeyCode::LShift);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::LeftControl(a) => {
             v.push(KeyCode::LCtrl);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::LeftAlt(a) => {
             v.push(KeyCode::LAlt);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::LeftGui(a) => {
             v.push(KeyCode::LGui);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::RightShift(a) => {
             v.push(KeyCode::RShift);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::RightControl(a) => {
             v.push(KeyCode::RCtrl);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::RightAlt(a) => {
             v.push(KeyCode::RAlt);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::RightGui(a) => {
             v.push(KeyCode::RGui);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::LeftControlAlt(a) => {
             v.push(KeyCode::LCtrl);
             v.push(KeyCode::LAlt);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::LeftShiftAlt(a) => {
             v.push(KeyCode::LShift);
             v.push(KeyCode::LAlt);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::LeftShiftGui(a) => {
             v.push(KeyCode::LShift);
             v.push(KeyCode::LGui);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::LeftAltGui(a) => {
             v.push(KeyCode::LAlt);
             v.push(KeyCode::LGui);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::RightControlAlt(a) => {
             v.push(KeyCode::RCtrl);
             v.push(KeyCode::RAlt);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::RightShiftAlt(a) => {
             v.push(KeyCode::RShift);
             v.push(KeyCode::RAlt);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::RightShiftGui(a) => {
             v.push(KeyCode::RShift);
             v.push(KeyCode::RGui);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::RightAltGui(a) => {
             v.push(KeyCode::RAlt);
             v.push(KeyCode::RGui);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::Meh(a) => {
             v.push(KeyCode::LCtrl);
             v.push(KeyCode::LShift);
             v.push(KeyCode::LAlt);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         QmkAction::Hyper(a) => {
             v.push(KeyCode::LCtrl);
             v.push(KeyCode::LShift);
             v.push(KeyCode::LAlt);
             v.push(KeyCode::LGui);
-            try_multiple_keycodes(*a, v)
+            try_multiple_keycodes(a, v)
         }
         _ => Err(format!("can not convert {:?} to keyberon action", action)),
     }
 }
 
-impl TryFrom<QmkAction> for Action {
+impl TryFrom<&QmkAction> for Action {
     type Error = String;
 
-    fn try_from(qmk: QmkAction) -> Result<Self, Self::Error> {
+    fn try_from(qmk: &QmkAction) -> Result<Self, Self::Error> {
         match qmk {
             QmkAction::KeyCode(QmkKeyCode::KcNo) => Ok(Action::NoOp),
             QmkAction::KeyCode(QmkKeyCode::KcTransparent) => Ok(Action::Trans),
             QmkAction::KeyCode(kc) => Ok(Action::KeyCode(KeyCode::try_from(kc)?)),
-            QmkAction::Any(a) => try_multiple_keycodes(*a, vec![]),
+            QmkAction::Any(a) => try_multiple_keycodes(a, vec![]),
             QmkAction::LeftShift(_)
             | QmkAction::LeftControl(_)
             | QmkAction::LeftAlt(_)
@@ -336,6 +336,7 @@ impl TryFrom<QmkAction> for Action {
     }
 }
 
+
 #[cfg(test)]
 mod convert_tests {
     use crate::keyberon::Action;
@@ -346,30 +347,30 @@ mod convert_tests {
     #[test]
     fn test_convert_keycodes() {
         // A
-        let kc_res = KeyCode::try_from(KcA);
+        let kc_res = KeyCode::try_from(&KcA);
         assert!(kc_res.is_ok());
         assert_eq!(kc_res.unwrap(), A);
         // Calculator
-        let kc_res = KeyCode::try_from(KcCalculator);
+        let kc_res = KeyCode::try_from(&KcCalculator);
         assert!(kc_res.is_ok());
         assert_eq!(kc_res.unwrap(), MediaCalc);
     }
 
     #[test]
     fn test_convert_action_keycodes() {
-        let res = Action::try_from(QmkAction::KeyCode(KcA));
+        let res = Action::try_from(&QmkAction::KeyCode(KcA));
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), Action::KeyCode(A));
         // Calculator
-        let res = Action::try_from(QmkAction::KeyCode(KcCalculator));
+        let res = Action::try_from(&QmkAction::KeyCode(KcCalculator));
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), Action::KeyCode(MediaCalc));
         // No
-        let res = Action::try_from(QmkAction::KeyCode(KcNo));
+        let res = Action::try_from(&QmkAction::KeyCode(KcNo));
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), Action::NoOp);
         // Trans
-        let res = Action::try_from(QmkAction::KeyCode(KcTransparent));
+        let res = Action::try_from(&QmkAction::KeyCode(KcTransparent));
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), Action::Trans);
     }
@@ -377,11 +378,11 @@ mod convert_tests {
     #[test]
     fn test_multiple_keycodes() {
         // LSFT(KC_A),
-        let res = Action::try_from(QmkAction::LeftShift(Box::new(QmkAction::KeyCode(KcA))));
+        let res = Action::try_from(&QmkAction::LeftShift(Box::new(QmkAction::KeyCode(KcA))));
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), Action::MultipleKeyCodes(vec![LShift, A]));
         // ANY(LCTL(LSFT(KC_B)))
-        let res = Action::try_from(QmkAction::Any(Box::new(QmkAction::LeftControl(Box::new(
+        let res = Action::try_from(&QmkAction::Any(Box::new(QmkAction::LeftControl(Box::new(
             QmkAction::LeftShift(Box::new(QmkAction::KeyCode(KcB))),
         )))));
         assert!(res.is_ok());
@@ -390,9 +391,9 @@ mod convert_tests {
             Action::MultipleKeyCodes(vec![LCtrl, LShift, B])
         );
         // ANY(RCTL(RALT(KC_DELETE)))
-        let res = Action::try_from(QmkAction::Any(Box::new(QmkAction::RightControl(Box::new(
-            QmkAction::RightAlt(Box::new(QmkAction::KeyCode(KcDel))),
-        )))));
+        let res = Action::try_from(&QmkAction::Any(Box::new(QmkAction::RightControl(
+            Box::new(QmkAction::RightAlt(Box::new(QmkAction::KeyCode(KcDel)))),
+        ))));
         assert!(res.is_ok());
         assert_eq!(
             res.unwrap(),
