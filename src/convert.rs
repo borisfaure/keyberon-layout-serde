@@ -1,5 +1,5 @@
-use crate::keyberon::Action;
-use crate::qmk::QmkAction;
+use crate::keyberon::{Action, Layers};
+use crate::qmk::{QmkAction, QmkKeymap};
 use crate::qmk_keycodes::QmkKeyCode;
 use keyberon::key_code::KeyCode;
 use std::convert::TryFrom;
@@ -336,11 +336,50 @@ impl TryFrom<&QmkAction> for Action {
     }
 }
 
+/// Compute the Row/Col index in the keyberon matrix based on the index on the
+/// Qmk layer
+fn get_row_col_idx(
+    idx: usize,
+    cols: usize,
+    rows: usize,
+    is_split: bool,
+    _n_keys: usize,
+) -> (usize, usize) {
+    let row = idx / cols;
+    if row == rows - 1 && is_split {
+        (row, idx % cols) // TODO
+    } else {
+        (row, idx % cols)
+    }
+}
+
+impl Layers {
+    pub fn try_from(
+        qmk: QmkKeymap,
+        cols: usize,
+        rows: usize,
+        is_split: bool,
+    ) -> Result<Self, String> {
+        let n_layers = qmk.layers.len();
+        let mut layers = Layers::with_capacity(cols, rows, n_layers);
+
+        for l in 0..n_layers {
+            let n_keys = qmk.layers[l].len();
+            for (i, a) in qmk.layers[l].iter().enumerate() {
+                let (r, c) = get_row_col_idx(i, cols, rows, is_split, n_keys);
+                layers.layers[l][r][c] = Action::try_from(a)?;
+            }
+        }
+        layers.is_split = is_split;
+
+        Ok(layers)
+    }
+}
 
 #[cfg(test)]
 mod convert_tests {
-    use crate::keyberon::Action;
-    use crate::qmk::QmkAction;
+    use crate::keyberon::{Action, Layers};
+    use crate::qmk::{QmkAction, QmkKeymap};
     use crate::qmk_keycodes::QmkKeyCode::*;
     use keyberon::key_code::KeyCode::{self, *};
 
@@ -399,5 +438,75 @@ mod convert_tests {
             res.unwrap(),
             Action::MultipleKeyCodes(vec![RCtrl, RAlt, Delete])
         );
+    }
+
+    #[test]
+    fn test_no_split_keycodes_only() {
+        let json = r#"{
+  "version": 1, "notes": "", "documentation": "", "keyboard": "", "keymap": "",
+  "layout": "", "author": "",
+  "layers": [ [
+      "KC_A", "KC_B", "KC_C", "KC_D",
+      "KC_E", "KC_F", "KC_G", "KC_H"
+      ], [
+      "KC_I", "KC_J", "KC_K", "KC_L",
+      "KC_M", "KC_N", "KC_O", "KC_P"
+      ], [
+      "KC_Q", "KC_R", "KC_S", "KC_T",
+      "KC_U", "KC_V", "KC_W", "KC_X"
+  ]]}"#;
+        let kb = Layers {
+            cols: 4,
+            rows: 2,
+            is_split: false,
+            layers: vec![
+                vec![
+                    vec![
+                        Action::KeyCode(A),
+                        Action::KeyCode(B),
+                        Action::KeyCode(C),
+                        Action::KeyCode(D),
+                    ],
+                    vec![
+                        Action::KeyCode(E),
+                        Action::KeyCode(F),
+                        Action::KeyCode(G),
+                        Action::KeyCode(H),
+                    ],
+                ],
+                vec![
+                    vec![
+                        Action::KeyCode(I),
+                        Action::KeyCode(J),
+                        Action::KeyCode(K),
+                        Action::KeyCode(L),
+                    ],
+                    vec![
+                        Action::KeyCode(M),
+                        Action::KeyCode(N),
+                        Action::KeyCode(O),
+                        Action::KeyCode(P),
+                    ],
+                ],
+                vec![
+                    vec![
+                        Action::KeyCode(Q),
+                        Action::KeyCode(R),
+                        Action::KeyCode(S),
+                        Action::KeyCode(T),
+                    ],
+                    vec![
+                        Action::KeyCode(U),
+                        Action::KeyCode(V),
+                        Action::KeyCode(W),
+                        Action::KeyCode(X),
+                    ],
+                ],
+            ],
+        };
+        let qmk = QmkKeymap::from_json_str(&json).unwrap();
+        let res = Layers::try_from(qmk, 4, 2, false);
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), kb);
     }
 }

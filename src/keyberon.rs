@@ -1,16 +1,46 @@
 use keyberon::key_code::KeyCode;
 
 /// Kind of dynamic version of Keyberon layers
-pub struct KeyberonLayers(Vec<Vec<Vec<Action>>>);
-
-impl KeyberonLayers {
-    pub fn new() -> Self {
-        Self(Vec::new())
-    }
+#[derive(Debug, Eq, PartialEq)]
+pub struct Layers {
+    pub cols: usize,
+    pub rows: usize,
+    pub is_split: bool,
+    pub layers: Vec<Vec<Vec<Action>>>,
 }
-impl Default for KeyberonLayers {
+
+impl Default for Layers {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl Layers {
+    pub fn new() -> Self {
+        Self {
+            cols: 0,
+            rows: 0,
+            is_split: false,
+            layers: Vec::new(),
+        }
+    }
+    pub fn with_capacity(nb_cols: usize, nb_rows: usize, nb_layers: usize) -> Self {
+        let mut layers = Vec::with_capacity(nb_layers);
+        for _ in 0..layers.capacity() {
+            let mut rows = Vec::with_capacity(nb_rows);
+            for _ in 0..rows.capacity() {
+                let mut cols = Vec::with_capacity(nb_cols);
+                cols.resize(nb_cols, Action::NoOp);
+                rows.push(cols);
+            }
+            layers.push(rows);
+        }
+        Self {
+            cols: nb_cols,
+            rows: nb_rows,
+            is_split: false,
+            layers,
+        }
     }
 }
 
