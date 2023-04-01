@@ -2,8 +2,13 @@
 name = "keyberon-layout-serde"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Boris Faure <boris@fau.re>"]
+license = "BSD-2-Clause"
+keywords = ["junit", "xml", "parser"]
+readme = "README.md"
+description = "Rust library to convert QMK layout files into Keyberon files"
+repository = "https://github.com/borisfaure/keyberon-layout-serde"
+documentation = "https://docs.rs/keyberon-layout-serde/"
 
 [dependencies]
 serde = { version = "1.0", default-features = false, features = ["derive"] }
