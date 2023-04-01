@@ -435,11 +435,14 @@ fn get_row_col_idx(
     cols: usize,
     rows: usize,
     is_split: bool,
-    _n_keys: usize,
+    n_keys: usize,
 ) -> (usize, usize) {
     let row = idx / cols;
     if row == rows - 1 && is_split {
-        (row, idx % cols) // TODO
+        let keys_last_row = n_keys - row * cols;
+        let idx = idx - row * cols;
+        let pad = (cols - keys_last_row) / 2;
+        (row, (idx + pad) % cols) // TODO
     } else {
         (row, idx % cols)
     }
@@ -662,6 +665,153 @@ mod convert_tests {
         };
         let qmk = QmkKeymap::from_json_str(&json).unwrap();
         let res = Layers::try_from(qmk, 4, 2, false);
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), kb);
+    }
+
+    #[test]
+    fn test_split_8_3() {
+        let json = r#"{
+  "version": 1, "notes": "", "documentation": "", "keyboard": "", "keymap": "",
+  "layout": "", "author": "",
+  "layers": [ [
+      "KC_A", "KC_B", "KC_C", "KC_D",    "KC_E", "KC_F", "KC_G", "KC_H",
+      "KC_I", "KC_J", "KC_K", "KC_L",    "KC_M", "KC_N", "KC_O", "KC_P",
+                      "KC_Q", "KC_R",    "KC_S", "KC_T"
+  ]]}"#;
+        let kb = Layers {
+            cols: 8,
+            rows: 3,
+            is_split: true,
+            layers: vec![vec![
+                vec![
+                    Action::KeyCode(A),
+                    Action::KeyCode(B),
+                    Action::KeyCode(C),
+                    Action::KeyCode(D),
+                    Action::KeyCode(E),
+                    Action::KeyCode(F),
+                    Action::KeyCode(G),
+                    Action::KeyCode(H),
+                ],
+                vec![
+                    Action::KeyCode(I),
+                    Action::KeyCode(J),
+                    Action::KeyCode(K),
+                    Action::KeyCode(L),
+                    Action::KeyCode(M),
+                    Action::KeyCode(N),
+                    Action::KeyCode(O),
+                    Action::KeyCode(P),
+                ],
+                vec![
+                    Action::NoOp,
+                    Action::NoOp,
+                    Action::KeyCode(Q),
+                    Action::KeyCode(R),
+                    Action::KeyCode(S),
+                    Action::KeyCode(T),
+                    Action::NoOp,
+                    Action::NoOp,
+                ],
+            ]],
+        };
+        let qmk = QmkKeymap::from_json_str(&json).unwrap();
+        let res = Layers::try_from(qmk, 8, 3, true);
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), kb);
+    }
+
+    #[test]
+    fn test_split_6_3() {
+        let json = r#"{
+  "version": 1, "notes": "", "documentation": "", "keyboard": "", "keymap": "",
+  "layout": "", "author": "",
+  "layers": [ [
+      "KC_B", "KC_C", "KC_D",    "KC_E", "KC_F", "KC_G",
+      "KC_J", "KC_K", "KC_L",    "KC_M", "KC_N", "KC_O",
+              "KC_Q", "KC_R",    "KC_S", "KC_T"
+  ]]}"#;
+        let kb = Layers {
+            cols: 6,
+            rows: 3,
+            is_split: true,
+            layers: vec![vec![
+                vec![
+                    Action::KeyCode(B),
+                    Action::KeyCode(C),
+                    Action::KeyCode(D),
+                    Action::KeyCode(E),
+                    Action::KeyCode(F),
+                    Action::KeyCode(G),
+                ],
+                vec![
+                    Action::KeyCode(J),
+                    Action::KeyCode(K),
+                    Action::KeyCode(L),
+                    Action::KeyCode(M),
+                    Action::KeyCode(N),
+                    Action::KeyCode(O),
+                ],
+                vec![
+                    Action::NoOp,
+                    Action::KeyCode(Q),
+                    Action::KeyCode(R),
+                    Action::KeyCode(S),
+                    Action::KeyCode(T),
+                    Action::NoOp,
+                ],
+            ]],
+        };
+        let qmk = QmkKeymap::from_json_str(&json).unwrap();
+        let res = Layers::try_from(qmk, 6, 3, true);
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), kb);
+    }
+
+    #[test]
+    fn test_split_6_3_bis() {
+        let json = r#"{
+  "version": 1, "notes": "", "documentation": "", "keyboard": "", "keymap": "",
+  "layout": "", "author": "",
+  "layers": [ [
+      "KC_B", "KC_C", "KC_D",    "KC_E", "KC_F", "KC_G",
+      "KC_J", "KC_K", "KC_L",    "KC_M", "KC_N", "KC_O",
+                      "KC_R",    "KC_S"
+  ]]}"#;
+        let kb = Layers {
+            cols: 6,
+            rows: 3,
+            is_split: true,
+            layers: vec![vec![
+                vec![
+                    Action::KeyCode(B),
+                    Action::KeyCode(C),
+                    Action::KeyCode(D),
+                    Action::KeyCode(E),
+                    Action::KeyCode(F),
+                    Action::KeyCode(G),
+                ],
+                vec![
+                    Action::KeyCode(J),
+                    Action::KeyCode(K),
+                    Action::KeyCode(L),
+                    Action::KeyCode(M),
+                    Action::KeyCode(N),
+                    Action::KeyCode(O),
+                ],
+                vec![
+                    Action::NoOp,
+                    Action::NoOp,
+                    Action::KeyCode(R),
+                    Action::KeyCode(S),
+                    Action::NoOp,
+                    Action::NoOp,
+                ],
+            ]],
+        };
+        let qmk = QmkKeymap::from_json_str(&json).unwrap();
+        let res = Layers::try_from(qmk, 6, 3, true);
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), kb);
     }
