@@ -1572,7 +1572,7 @@ pub enum QmkKeyCode {
     #[serde(alias = "BL_BRTG")]
     QkBacklightToggleBreathing,
     #[serde(rename = "RGB_TOG")]
-    RgbTog,
+    RgbToggle,
     #[serde(rename = "RGB_MODE_FORWARD")]
     #[serde(alias = "RGB_MOD")]
     RgbModeForward,
