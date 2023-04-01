@@ -2,6 +2,7 @@ use crate::keyberon::{Action, Layers};
 use crate::qmk::{QmkAction, QmkKeymap};
 use crate::qmk_keycodes::QmkKeyCode;
 use keyberon::key_code::KeyCode;
+use log::warn;
 use std::convert::TryFrom;
 
 impl TryFrom<&QmkKeyCode> for KeyCode {
@@ -454,6 +455,7 @@ impl Layers {
         cols: usize,
         rows: usize,
         is_split: bool,
+        ignore_errors: bool,
     ) -> Result<Self, String> {
         let n_layers = qmk.layers.len();
         let mut layers = Layers::with_capacity(cols, rows, n_layers);
@@ -462,7 +464,19 @@ impl Layers {
             let n_keys = qmk.layers[l].len();
             for (i, a) in qmk.layers[l].iter().enumerate() {
                 let (r, c) = get_row_col_idx(i, cols, rows, is_split, n_keys);
-                layers.layers[l][r][c] = Action::try_from(a)?;
+                let res_a = Action::try_from(a);
+                let a = if ignore_errors {
+                    match res_a {
+                        Ok(a) => a,
+                        Err(err) => {
+                            warn!("Ignoring: {}", err);
+                            Action::NoOp
+                        }
+                    }
+                } else {
+                    res_a?
+                };
+                layers.layers[l][r][c] = a;
             }
         }
         layers.is_split = is_split;
@@ -664,7 +678,7 @@ mod convert_tests {
             ],
         };
         let qmk = QmkKeymap::from_json_str(&json).unwrap();
-        let res = Layers::try_from(qmk, 4, 2, false);
+        let res = Layers::try_from(qmk, 4, 2, false, false);
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), kb);
     }
@@ -717,7 +731,7 @@ mod convert_tests {
             ]],
         };
         let qmk = QmkKeymap::from_json_str(&json).unwrap();
-        let res = Layers::try_from(qmk, 8, 3, true);
+        let res = Layers::try_from(qmk, 8, 3, true, false);
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), kb);
     }
@@ -764,7 +778,7 @@ mod convert_tests {
             ]],
         };
         let qmk = QmkKeymap::from_json_str(&json).unwrap();
-        let res = Layers::try_from(qmk, 6, 3, true);
+        let res = Layers::try_from(qmk, 6, 3, true, false);
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), kb);
     }
@@ -811,7 +825,7 @@ mod convert_tests {
             ]],
         };
         let qmk = QmkKeymap::from_json_str(&json).unwrap();
-        let res = Layers::try_from(qmk, 6, 3, true);
+        let res = Layers::try_from(qmk, 6, 3, true, false);
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), kb);
     }
