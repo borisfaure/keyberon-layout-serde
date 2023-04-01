@@ -331,6 +331,92 @@ impl TryFrom<&QmkAction> for Action {
             | QmkAction::RightAltGui(_)
             | QmkAction::Meh(_)
             | QmkAction::Hyper(_) => try_multiple_keycodes(qmk, vec![]),
+            QmkAction::LeftShiftWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::KeyCode(KeyCode::LShift)),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::LeftControlWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::KeyCode(KeyCode::LCtrl)),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::LeftAltWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::KeyCode(KeyCode::LAlt)),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::LeftGuiWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::KeyCode(KeyCode::LGui)),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::RightShiftWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::KeyCode(KeyCode::RShift)),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::RightControlWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::KeyCode(KeyCode::RCtrl)),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::RightAltWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::KeyCode(KeyCode::RAlt)),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::RightGuiWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::KeyCode(KeyCode::RGui)),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::LeftControlShiftWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::MultipleKeyCodes(vec![
+                    KeyCode::LCtrl,
+                    KeyCode::LShift,
+                ])),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::LeftControlAltWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::MultipleKeyCodes(vec![
+                    KeyCode::LCtrl,
+                    KeyCode::LAlt,
+                ])),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::LeftShiftGuiWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::MultipleKeyCodes(vec![
+                    KeyCode::LShift,
+                    KeyCode::LGui,
+                ])),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::LeftControlAltGuiWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::MultipleKeyCodes(vec![
+                    KeyCode::LCtrl,
+                    KeyCode::LAlt,
+                    KeyCode::LGui,
+                ])),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::RightControlAltGuiWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::MultipleKeyCodes(vec![
+                    KeyCode::RCtrl,
+                    KeyCode::RAlt,
+                    KeyCode::RGui,
+                ])),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::LeftControlShiftAltWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::MultipleKeyCodes(vec![
+                    KeyCode::LCtrl,
+                    KeyCode::LShift,
+                    KeyCode::LAlt,
+                ])),
+                Box::new(Action::try_from(&**a)?),
+            )),
+            QmkAction::LeftControlShiftAltGuiWhenHeldOr(a) => Ok(Action::HoldTap(
+                Box::new(Action::MultipleKeyCodes(vec![
+                    KeyCode::LCtrl,
+                    KeyCode::LShift,
+                    KeyCode::LAlt,
+                    KeyCode::LGui,
+                ])),
+                Box::new(Action::try_from(&**a)?),
+            )),
             _ => Err(format!("can not convert {:?} to keyberon action", qmk)),
         }
     }
@@ -437,6 +523,48 @@ mod convert_tests {
         assert_eq!(
             res.unwrap(),
             Action::MultipleKeyCodes(vec![RCtrl, RAlt, Delete])
+        );
+    }
+
+    #[test]
+    fn test_hold_tap() {
+        // LSFT_T(KC_A),
+        let res = Action::try_from(&QmkAction::LeftShiftWhenHeldOr(Box::new(
+            QmkAction::KeyCode(KcA),
+        )));
+        assert!(res.is_ok());
+        assert_eq!(
+            res.unwrap(),
+            Action::HoldTap(
+                Box::new(Action::KeyCode(LShift)),
+                Box::new(Action::KeyCode(A))
+            )
+        );
+        // C_S_T(KC_B)))
+        let res = Action::try_from(&QmkAction::LeftControlShiftWhenHeldOr(Box::new(
+            QmkAction::KeyCode(KcB),
+        )));
+        assert!(res.is_ok());
+        assert_eq!(
+            res.unwrap(),
+            Action::HoldTap(
+                Box::new(Action::MultipleKeyCodes(vec![LCtrl, LShift])),
+                Box::new(Action::KeyCode(B))
+            )
+        );
+        // MEH_T(ANY(RCTL(RALT(KC_DELETE))))
+        let res = Action::try_from(&QmkAction::LeftControlShiftAltWhenHeldOr(Box::new(
+            QmkAction::Any(Box::new(QmkAction::RightControl(Box::new(
+                QmkAction::RightAlt(Box::new(QmkAction::KeyCode(KcDel))),
+            )))),
+        )));
+        assert!(res.is_ok());
+        assert_eq!(
+            res.unwrap(),
+            Action::HoldTap(
+                Box::new(Action::MultipleKeyCodes(vec![LCtrl, LShift, LAlt])),
+                Box::new(Action::MultipleKeyCodes(vec![RCtrl, RAlt, Delete]))
+            )
         );
     }
 
