@@ -331,6 +331,12 @@ impl TryFrom<&QmkAction> for Action {
             | QmkAction::RightAltGui(_)
             | QmkAction::Meh(_)
             | QmkAction::Hyper(_) => try_multiple_keycodes(qmk, vec![]),
+            QmkAction::DefaultLayer(num) => Ok(Action::DefaultLayer(*num as usize)),
+            QmkAction::TurnOnLayerWhenPressed(num) => Ok(Action::Layer(*num as usize)),
+            QmkAction::LayerWhenHeldOr(num, a) => Ok(Action::HoldTap(
+                Box::new(Action::Layer(*num as usize)),
+                Box::new(Action::try_from(&**a)?),
+            )),
             QmkAction::LeftShiftWhenHeldOr(a) => Ok(Action::HoldTap(
                 Box::new(Action::KeyCode(KeyCode::LShift)),
                 Box::new(Action::try_from(&**a)?),
@@ -566,6 +572,28 @@ mod convert_tests {
                 Box::new(Action::MultipleKeyCodes(vec![RCtrl, RAlt, Delete]))
             )
         );
+    }
+
+    #[test]
+    fn test_layers() {
+        // TO(0),
+        let res = Action::try_from(&QmkAction::TurnOnLayerWhenPressed(0));
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), Action::Layer(0));
+        // LT(1, KC_B)))
+        let res = Action::try_from(&QmkAction::LayerWhenHeldOr(
+            1,
+            Box::new(QmkAction::KeyCode(KcB)),
+        ));
+        assert!(res.is_ok());
+        assert_eq!(
+            res.unwrap(),
+            Action::HoldTap(Box::new(Action::Layer(1)), Box::new(Action::KeyCode(B)))
+        );
+        // DF(2)
+        let res = Action::try_from(&QmkAction::DefaultLayer(2));
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), Action::DefaultLayer(2));
     }
 
     #[test]
