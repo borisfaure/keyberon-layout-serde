@@ -420,7 +420,7 @@ impl<'de> Deserialize<'de> for QmkAction {
 /// The basic structure for the layout JSON files used in
 /// [qmk configurator](https://config.qmk.fm/)
 #[derive(Deserialize, Debug)]
-pub struct QmkKeymap {
+pub struct QmkKeyMap {
     pub version: u32,
     pub notes: String,
     pub documentation: String,
@@ -431,8 +431,8 @@ pub struct QmkKeymap {
     pub author: String,
 }
 
-impl QmkKeymap {
-    /// Deserialize a JSON string @json into a QmkKeymap
+impl QmkKeyMap {
+    /// Deserialize a JSON string @json into a QmkKeyMap
     pub fn from_json_str(json: &str) -> Result<Self, JsonError> {
         serde_json::from_str(json)
     }
@@ -440,7 +440,7 @@ impl QmkKeymap {
 
 #[cfg(test)]
 mod qmk_tests {
-    use crate::qmk::QmkKeymap;
+    use crate::qmk::QmkKeyMap;
     #[test]
     fn test_basic_one_layer_only_keycodes() {
         let json = r#"
@@ -462,7 +462,7 @@ mod qmk_tests {
   ],
   "author": ""
 }"#;
-        let qmk_res = QmkKeymap::from_json_str(&json);
+        let qmk_res = QmkKeyMap::from_json_str(&json);
         assert!(qmk_res.is_ok());
     }
 
@@ -490,7 +490,7 @@ mod qmk_tests {
   ],
   "author": ""
 }"#;
-        let qmk_res = QmkKeymap::from_json_str(&json);
+        let qmk_res = QmkKeyMap::from_json_str(&json);
         println!("{:?}", qmk_res);
         assert!(qmk_res.is_ok());
     }
@@ -508,7 +508,7 @@ mod qmk_tests {
       "RCTL(KC_LALT)",
       "ANY(KC_ENTER)"
   ]]}"#;
-        let qmk_res = QmkKeymap::from_json_str(&json);
+        let qmk_res = QmkKeyMap::from_json_str(&json);
         println!("{:?}", qmk_res);
         assert!(qmk_res.is_ok());
     }
@@ -522,7 +522,7 @@ mod qmk_tests {
       "LT(0,KC_A)",
       "LT(1,LSFT(KC_B))"
   ]]}"#;
-        let qmk_res = QmkKeymap::from_json_str(&json);
+        let qmk_res = QmkKeyMap::from_json_str(&json);
         println!("{:?}", qmk_res);
         assert!(qmk_res.is_ok());
     }
@@ -539,7 +539,7 @@ mod qmk_tests {
       "KC_COLON",
       "KC_PLUS"
   ]]}"#;
-        let qmk_res = QmkKeymap::from_json_str(&json);
+        let qmk_res = QmkKeyMap::from_json_str(&json);
         println!("{:?}", qmk_res);
         assert!(qmk_res.is_ok());
     }

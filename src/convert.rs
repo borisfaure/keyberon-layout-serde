@@ -1,5 +1,5 @@
 use crate::keyberon::{Action, Layers};
-use crate::qmk::{QmkAction, QmkKeymap};
+use crate::qmk::{QmkAction, QmkKeyMap};
 use crate::qmk_keycodes::QmkKeyCode;
 use keyberon::key_code::KeyCode;
 use log::warn;
@@ -451,7 +451,7 @@ fn get_row_col_idx(
 
 impl Layers {
     pub fn try_from(
-        qmk: QmkKeymap,
+        qmk: QmkKeyMap,
         cols: usize,
         rows: usize,
         is_split: bool,
@@ -488,7 +488,7 @@ impl Layers {
 #[cfg(test)]
 mod convert_tests {
     use crate::keyberon::{Action, Layers};
-    use crate::qmk::{QmkAction, QmkKeymap};
+    use crate::qmk::{QmkAction, QmkKeyMap};
     use crate::qmk_keycodes::QmkKeyCode::*;
     use keyberon::key_code::KeyCode::{self, *};
 
@@ -677,7 +677,7 @@ mod convert_tests {
                 ],
             ],
         };
-        let qmk = QmkKeymap::from_json_str(&json).unwrap();
+        let qmk = QmkKeyMap::from_json_str(&json).unwrap();
         let res = Layers::try_from(qmk, 4, 2, false, false);
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), kb);
@@ -730,7 +730,7 @@ mod convert_tests {
                 ],
             ]],
         };
-        let qmk = QmkKeymap::from_json_str(&json).unwrap();
+        let qmk = QmkKeyMap::from_json_str(&json).unwrap();
         let res = Layers::try_from(qmk, 8, 3, true, false);
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), kb);
@@ -777,7 +777,7 @@ mod convert_tests {
                 ],
             ]],
         };
-        let qmk = QmkKeymap::from_json_str(&json).unwrap();
+        let qmk = QmkKeyMap::from_json_str(&json).unwrap();
         let res = Layers::try_from(qmk, 6, 3, true, false);
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), kb);
@@ -824,7 +824,7 @@ mod convert_tests {
                 ],
             ]],
         };
-        let qmk = QmkKeymap::from_json_str(&json).unwrap();
+        let qmk = QmkKeyMap::from_json_str(&json).unwrap();
         let res = Layers::try_from(qmk, 6, 3, true, false);
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), kb);
